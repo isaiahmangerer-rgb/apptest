@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reveal My Address</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #0078ff;
+            color: white;
+        }
+
+        button:hover {
+            background: #005fcc;
+        }
+
+        #result {
+            margin-top: 25px;
+            font-size: 20px;
+            max-width: 600px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Reveal My Address</h1>
+
+<button id="revealBtn">Click to reveal your address</button>
+
+<div id="result"></div>
+
+<script>
+const button = document.getElementById("revealBtn");
+const result = document.getElementById("result");
+
+button.addEventListener("click", () => {
+
+    if (!navigator.geolocation) {
+        result.textContent = "Your browser doesn't support Geolocation.";
+        return;
+    }
+
+    result.textContent = "Getting your location...";
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
+            );
+
+            const data = await response.json();
+
+            result.innerHTML = `
+                <strong>Your Address:</strong><br><br>
+                ${data.display_name}
+            `;
+
+        } catch (err) {
+            result.textContent = "Couldn't retrieve your address.";
+        }
+
+    }, () => {
+        result.textContent = "Location permission denied.";
+    });
+
+});
+</script>
+
+</body>
+</html>
