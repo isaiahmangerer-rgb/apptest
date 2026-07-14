@@ -3,93 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reveal My Address</title>
+    <title>Boat GPS Tracker</title>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f4f4f4;
+            background: #e8f4ff;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
         }
 
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
         h1 {
-            margin-bottom: 20px;
+            color: #0077cc;
         }
 
         button {
-            padding: 15px 30px;
+            background: #0077cc;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
             font-size: 18px;
             cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            background: #0078ff;
-            color: white;
+            margin-top: 15px;
         }
 
         button:hover {
-            background: #005fcc;
+            background: #005fa3;
         }
 
-        #result {
-            margin-top: 25px;
-            font-size: 20px;
-            max-width: 600px;
-            text-align: center;
+        .info {
+            margin-top: 20px;
+            text-align: left;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .boat {
+            margin-top: 10px;
+            padding: 10px;
+            background: #d9f0ff;
+            border-radius: 8px;
         }
     </style>
 </head>
+
 <body>
 
-<h1>Reveal My Address</h1>
+<div class="container">
 
-<button id="revealBtn">Click to reveal your address</button>
+    <h1>🚤 Boat GPS Tracker</h1>
 
-<div id="result"></div>
+    <button onclick="findLocation()">
+        Find My Boat
+    </button>
+
+    <div class="info" id="location">
+        Location not found yet.
+    </div>
+
+    <h3>Nearby Boats</h3>
+
+    <div class="boat">
+        🚤 Fishing Boat<br>
+        Distance: Unknown
+    </div>
+
+    <div class="boat">
+        🚤 Pontoon Boat<br>
+        Distance: Unknown
+    </div>
+
+</div>
+
 
 <script>
-const button = document.getElementById("revealBtn");
-const result = document.getElementById("result");
 
-button.addEventListener("click", () => {
+function findLocation() {
+
+    const locationBox = document.getElementById("location");
 
     if (!navigator.geolocation) {
-        result.textContent = "Your browser doesn't support Geolocation.";
+        locationBox.innerHTML =
+        "GPS is not supported on this device.";
         return;
     }
 
-    result.textContent = "Getting your location...";
+    locationBox.innerHTML =
+    "Finding location...";
 
-    navigator.geolocation.getCurrentPosition(async (position) => {
+    navigator.geolocation.getCurrentPosition(
 
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
+        function(position) {
 
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
-            );
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+            let accuracy = position.coords.accuracy;
 
-            const data = await response.json();
-
-            result.innerHTML = `
-                <strong>Your Address:</strong><br><br>
-                ${data.display_name}
+            locationBox.innerHTML = `
+                <b>Your Boat Location:</b><br><br>
+                Latitude: ${lat.toFixed(6)}<br>
+                Longitude: ${lon.toFixed(6)}<br>
+                Accuracy: ${accuracy.toFixed(1)} meters
             `;
 
-        } catch (err) {
-            result.textContent = "Couldn't retrieve your address.";
+        },
+
+        function(error) {
+
+            locationBox.innerHTML =
+            "Location permission denied.";
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
 
-    }, () => {
-        result.textContent = "Location permission denied.";
-    });
+    );
 
-});
+}
+
 </script>
 
 </body>
